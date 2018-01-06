@@ -179,11 +179,20 @@ class ClientApiError(Exception):
 
 class Client(object):
     def __init__(self, access_key=None, secret_key=None, url=None, cache=False,
-                 cache_time=86400, strict=False, headers=HEADERS, **kw):
-        self._headers = headers
+                 cache_time=86400, strict=False, headers=HEADERS, token=None,
+                 **kw):
+        self._headers = HEADERS
+        for k, v in headers.iteritems():
+            self._headers[k] = v
+        if token is not None:
+            self._token = token
+            self._headers['Authorization'] = 'Bearer ' + token
         self._access_key = access_key
         self._secret_key = secret_key
-        self._auth = (self._access_key, self._secret_key)
+        if self._access_key is None:
+            self._auth = None
+        else:
+            self._auth = (self._access_key, self._secret_key)
         self._url = url
         self._cache = cache
         self._cache_time = cache_time
@@ -633,7 +642,7 @@ def _env_prefix(cmd):
 
 def from_env(prefix=PREFIX + '_', factory=Client, **kw):
     args = dict((x, None) for x in ['access_key', 'secret_key', 'url', 'cache',
-                                    'cache_time', 'strict'])
+                                    'cache_time', 'strict', 'token'])
     args.update(kw)
     if not prefix.endswith('_'):
         prefix += '_'
