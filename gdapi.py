@@ -180,7 +180,7 @@ class ClientApiError(Exception):
 class Client(object):
     def __init__(self, access_key=None, secret_key=None, url=None, cache=False,
                  cache_time=86400, strict=False, headers=HEADERS, token=None,
-                 **kw):
+                 verify=True, **kw):
         self._headers = HEADERS
         for k, v in headers.iteritems():
             self._headers[k] = v
@@ -199,6 +199,7 @@ class Client(object):
         self._strict = strict
         self.schema = None
         self._session = requests.Session()
+        self._session.verify = verify
 
         if not self._cache_time:
             self._cache_time = 60 * 60 * 24  # 24 Hours
